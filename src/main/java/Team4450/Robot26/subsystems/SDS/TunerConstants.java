@@ -59,7 +59,7 @@ public class TunerConstants {
     // Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
     // Some configs will be overwritten; check the `with*InitialConfigs()` API documentation.
     private static final TalonFXConfiguration driveInitialConfigs = new TalonFXConfiguration()
-        .withOpenLoopRamps(openLoopRamp);
+        .withOpenLoopRamps(openLoopRamp); // 4450
 
     private static final TalonFXConfiguration steerInitialConfigs = new TalonFXConfiguration()
         .withCurrentLimits(
@@ -200,10 +200,12 @@ public class TunerConstants {
     /**
      * Creates a CommandSwerveDrivetrain instance.
      * This should only be called once in your robot program,.
+     * 4450-NOTE: 100hz update period is for rio can bus. If you switch
+     * to a CANIvore it should be 250.
      */
     public static CommandSwerveDrivetrain createDrivetrain() {
         return new CommandSwerveDrivetrain(
-            DrivetrainConstants, FrontLeft, FrontRight, BackLeft, BackRight
+            DrivetrainConstants, 100, FrontLeft, FrontRight, BackLeft, BackRight
         );
     }
 
