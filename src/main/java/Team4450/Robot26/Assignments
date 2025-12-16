@@ -59,20 +59,20 @@ Port	Device			Description
 -----------------------------------------------------------------------------------
 
 
-Driver GamePad - Left Joystick
+Driver Controller - Left Joystick
 Button Name				Function
 -----------------------------------------------------------------------------------
 Y Axis					Forward/Backward driving.
 X Axis                  Left/Right strafe (sideways movement).
 
 
-Driver GamePad - Right Joystick
+Driver Congtroller - Right Joystick
 Button Name				Function
 -----------------------------------------------------------------------------------
 X Axis                  Rotate.
 
 
-Driver GamePad - Buttons
+Driver Controller - Buttons
 Button Name				Function
 -----------------------------------------------------------------------------------
 LEFT_TRIGGER            
@@ -91,18 +91,18 @@ X
 Y                       
 
 
-Utility GamePad - Left Joystick
+Utility Controller - Left Joystick
 Button Name				Function
 -----------------------------------------------------------------------------------
 Y Axis                  
 
 
-Utility GamePad - Right Joystick
+Utility Controller - Right Joystick
 Button Name				Function
 -----------------------------------------------------------------------------------
 
 
-Utility GamePad - Buttons
+Utility Controller - Buttons
 Button Name				Function
 -----------------------------------------------------------------------------------
 

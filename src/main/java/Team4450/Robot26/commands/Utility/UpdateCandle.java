@@ -8,7 +8,6 @@ import Team4450.Robot26.subsystems.Candle.AnimationTypes;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotState;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -17,7 +16,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 public class UpdateCandle extends Command {
     private Candle candle;
-    private enum State {DISABLED, INTAKING, HAS_NOTE, TARGET_LOCKED, ALLIANCE, OFF}
+    private enum State {DISABLED, ENABLED, TARGET_LOCKED, ALLIANCE, OFF}
     private State state = State.DISABLED;
     private double time;
 
@@ -44,12 +43,8 @@ public class UpdateCandle extends Command {
             state = State.DISABLED;
         } else if (RobotState.isDisabled()) { // disabled on FMS
             state = State.ALLIANCE;
-        } else if (SmartDashboard.getBoolean("Intake", false)){ // intaking
-            state = State.INTAKING;
-        } else if (SmartDashboard.getBoolean("Target Locked", false)) { // target locked
-            state = State.TARGET_LOCKED;
-        } else if (SmartDashboard.getBoolean("Note Sensor", false)) { // has note
-            state = State.HAS_NOTE;
+        } else if (RobotState.isEnabled()) { 
+            state = State.ENABLED;        
         } else { // no LEDs
             state = State.OFF;
         }
@@ -93,11 +88,7 @@ public class UpdateCandle extends Command {
                 candle.setAnimation(AnimationTypes.Off);
                 candle.setLeds(alliance==Alliance.Blue ? Color.kBlue : Color.kRed);
                 break;
-            case INTAKING: // blinking red
-                candle.setAnimation(AnimationTypes.Off);
-                blink(Color.kRed);
-                break;
-            case HAS_NOTE: // solid green
+            case ENABLED:
                 candle.setAnimation(AnimationTypes.Off);
                 candle.setLeds(Color.kGreen);
                 break;

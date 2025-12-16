@@ -249,14 +249,13 @@ public class RobotContainer
 	/**
 	 * Use this method to define your button->command mappings.
      * 
-     * These buttons are for real robot driver station with 3 sticks and launchpad.
-	 * The launchpad makes the colored buttons look like a joystick.
+     * These buttons are for robot driver station with 2 Xbox or F310 controllers.
 	 */
 	private void configureButtonBindings() 
 	{
 		Util.consoleLog();
 	  
-		// ------- Driver pad buttons -------------
+		// ------- Driver controller buttons -------------
 		
 		// For simple functions, instead of creating commands, we can call convenience functions on
 		// the target subsystem from an InstantCommand. It can be tricky deciding what functions
@@ -308,7 +307,7 @@ public class RobotContainer
 		new Trigger(() -> driverController.getPOV() == 90) // rich
 			.onTrue(new InstantCommand(driveBase::setX));
 			
-		// -------- Utility pad buttons ----------
+		// -------- Utility controller buttons ----------
 
 	}
 
