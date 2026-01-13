@@ -60,17 +60,22 @@ public final class Constants
 	// GamePad port assignments.
 	public static final int		DRIVER_PAD = 0, UTILITY_PAD = 1;
 
-    public static String LIMELIGHT_ONE = "limelight-right";
-    public static String LIMELIGHT_TWO = "limelight-left";
+    public static String LIMELIGHT_LEFT = "limelight-left";
+    public static String LIMELIGHT_RIGHT = "limelight-right";
 
-    // Goal Positions
+    // Assume all field measurements are in meters
+    // Field Limits
+    public static double FIELD_MAX_X = 16.54 / 2;
+    public static double FIELD_MAX_Y = 8.07 / 2;
+
+    // HUB Positions
     
     // Blue
-    public static double GOAL_BLUE_X = 10;
-    public static double GOAL_BLUE_Y = 10;
+    public static double HUB_BLUE_X = 10;
+    public static double HUB_BLUE_Y = 10;
     // Red
-    public static double GOAL_RED_X = 10;
-    public static double GOAL_RED_Y = 10;
+    public static double HUB_RED_X = 10;
+    public static double HUB_RED_Y = 10;
 
     public static double FLYWHEEL_MAX_THEORETICAL_RPM = 4000;
 

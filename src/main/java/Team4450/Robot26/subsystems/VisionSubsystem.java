@@ -1,78 +1,112 @@
- package Team4450.Robot26.subsystems;
+package Team4450.Robot26.subsystems;
 
 import static Team4450.Robot26.Constants.alliance;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import Team4450.Lib.Util;
+import Team4450.Robot26.Constants;
+import Team4450.Robot26.utility.RobotOrientation;
+import java.lang.Math;
 
 public class VisionSubsystem extends SubsystemBase {
-    public VisionSubsystem() {
+    // Info from: https://docs.limelightvision.io/docs/docs-limelight/pipeline-apriltag/apriltags
+    //
+    // TODO: We need to aim the Limelight upwards at an angle when the april tag is as centered as possible at 10-20 feet or so (Whatever the average sight distance will be)
+    //
+    // The tag collection family in "AprilTag Classic 36h11
+    // The Limelight offset from robot pose must be set in the web view for each Limelight
+    //
+    // The Coordinate plane for Limelight is as follows
+    // https://docs.limelightvision.io/docs/docs-limelight/pipeline-apriltag/apriltag-coordinate-systems
+
+    // Speed tips
+    //
+    // Increase detector downscale for insteased framerate without affecting 3D accuracy
+    // Lower brightness and contrast values will improve pipeline framerate at the cost of range
+    // If the Limelight has a large area of the frame that will never have a tag, then the area that the april tag algo will be reduced and result in huge performance
+    //
+    // MegaTag 2
+    //
+    // The heading of the robot is required to use this, Idealy pas a complete robot orientation and angular velocities
+    // LimelightHelpers.SetRobotOrientation(robotYawInDegrees,0,0,0,0,0))
+    // SetRobotOrientation assumes a centered (see the map generator) or blue-corner origin. CCW-positive, 0 degrees -> facing red alliance wall in FRC.
+    //
+    DriveBase drivebase;
+    public VisionSubsystem(DriveBase drivebase) {
+        this.drivebase = drivebase;
+        // Init Left and Right Limelight
+        //
+        // To use the Limelight 4 built in IMU to get even better MegaTag 2 updates
+        // 
+        // For each
+        // Firstly, run SetRobotOrientation()
+        // Next, run SetIMUMode() // Use mode 2 when enabled and mode 1 when disabled, so put this in a disable function
+        //
+        RobotOrientation rO = drivebase.getRobotOrientation(); // IDK if RobotOrientation works correctly, look there to see
+        
+        zeroLimelightIMU(rO);
+
+        Util.consoleLog("Init Limelight Left");
+        LimelightHelpers.SetRobotOrientation(Constants.LIMELIGHT_LEFT, rO.yaw, rO.yawRate, rO.pitch, rO.pitchRate, rO.roll, rO.rollRate);
+        Util.consoleLog("Init Limelight Right");
+        LimelightHelpers.SetRobotOrientation(Constants.LIMELIGHT_RIGHT, rO.yaw, rO.yawRate, rO.pitch, rO.pitchRate, rO.roll, rO.rollRate);
+        // IMU mode 2 uses to Limelight 4 internal IMU
+        LimelightHelpers.SetIMUMode(Constants.LIMELIGHT_LEFT, 2);
+        LimelightHelpers.SetIMUMode(Constants.LIMELIGHT_RIGHT, 2);
+
     }
 
     @Override
     public void periodic() {
-        // What will the turret need to update over time
+        boolean useLeftLimelight = true;
+        boolean useRightLimelight = true;
+        // Get latest pose estimage from each camera
+        //
+        //
+        LimelightHelpers.PoseEstimate left_mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.LIMELIGHT_LEFT);
+        LimelightHelpers.PoseEstimate right_mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.LIMELIGHT_RIGHT);
+
+        // If the angular velocity is greater than 720 degrees per second ignore the vision update
+        //
+        // IDK if this is yaw rate or what units this is in
+        if (Math.abs(drivebase.gyro.pigeon.getAngularVelocityXDevice().getValueAsDouble()) > 720) {
+            return;
+        }
+
+        // Get rid of any result that says we are out of the field
+        
+        // IDK what units the getX() return
+        if (Math.abs(left_mt2.pose.getX()) > Constants.FIELD_MAX_X) {
+            useLeftLimelight = false;
+        }
+
+        if (Math.abs(right_mt2.pose.getX()) > Constants.FIELD_MAX_X) {
+            useRightLimelight = false;
+        }
+
+        // IDK what units the getY() return
+        if (Math.abs(left_mt2.pose.getY()) > Constants.FIELD_MAX_Y) {
+            useLeftLimelight = false;
+        }
+
+        if (Math.abs(right_mt2.pose.getY()) > Constants.FIELD_MAX_Y) {
+            useRightLimelight = false;
+        }
+        
+        // Get rid of the result if the yaw of the resulting pose is impossible
+        //
+        // I think the yaw is between -180 and 180 instead of 0 - 360
+        // if (left_mt2.pose.getRotation().getDegrees() < 0 || left_mt2.pose.getRotation().getDegrees() > 360 || right_mt2.pose.getRotation().getDegrees() < 0 || right_mt2.pose.getRotation().getDegrees() > 360) {
+        //     return;
+        // }
     }
 
-        LimeLightInfo info = limelightLogic.logicBotPoseCM();
-        if (info == null) {
-            return null;
-        }
-        // If LimeLight result outside of the field ignore it
-        double x = info.pose.getX(DistanceUnit.CM);
-        double y = info.pose.getY(DistanceUnit.CM);
-        double yaw = info.pose.getHeading(AngleUnit.DEGREES);
-        // If outside the field x
-        if (Math.abs(x) > 182.88) {
-            robotContainer.telemetry.addData("Limelight Failed because", " x+");
-            return null;
-        }
-        // If outside the field y
-        if (Math.abs(y) > 182.88) {
-            robotContainer.telemetry.addData("Limelight Failed because", " y+");
-            return null;
-        }
-        // If yaw is impossible
-//        if (yaw > 360 || yaw < 0) {
-//            robotContainer.telemetry.addData("Limelight Failed because", " yaw");
-//            return null;
-//        }
-        robotContainer.telemetry.addData("llyaw", yaw);
-        // If the april tag is to far from the center x
-        if (Math.abs(info.result.getTx()) > 12) {
-            robotContainer.telemetry.addData("Limelight Failed because", " tx");
-            return null;
-        }
-        // If the april tag is to far from the center y
-        if (Math.abs(info.result.getTy()) > 12) {
-            robotContainer.telemetry.addData("Limelight Failed because", " ty");
-            return null;
-        }
-        // Maybe more?
-        return info.pose;
+    public void zeroLimelightIMU(RobotOrientation rO) { // Set to IMU mode 0 to diable the internal limelight IMU
+        // Setting to IMU mode 1 will use the setRobotOrientation to set the internal Limelight IMU
+        LimelightHelpers.SetIMUMode(Constants.LIMELIGHT_LEFT, 1);
+        LimelightHelpers.SetIMUMode(Constants.LIMELIGHT_RIGHT, 1);
+        
+        LimelightHelpers.SetRobotOrientation(Constants.LIMELIGHT_LEFT, rO.yaw, rO.yawRate, rO.pitch, rO.pitchRate, rO.roll, rO.rollRate);
+        LimelightHelpers.SetRobotOrientation(Constants.LIMELIGHT_RIGHT, rO.yaw, rO.yawRate, rO.pitch, rO.pitchRate, rO.roll, rO.rollRate);
     }
-    private LimeLightInfo getGoodLimeLightInfo() {
-        LimeLightInfo info = limelightLogic.logicBotPoseCM();
-        if (info == null) {
-            return null;
-        }
-        // If LimeLight result outside of the field ignore it
-        double x = info.pose.getX(DistanceUnit.CM);
-        double y = info.pose.getY(DistanceUnit.CM);
-        double yaw = info.pose.getHeading(AngleUnit.DEGREES);
-        // If outside the field x
-        if (Math.abs(x) > 182.88) {
-            robotContainer.telemetry.addData("Limelight Failed because", " x+");
-            return null;
-        }
-        // If outside the field y
-        if (Math.abs(y) > 182.88) {
-            robotContainer.telemetry.addData("Limelight Failed because", " y+");
-            return null;
-        }
-        // If yaw is impossible
-//        if (yaw > 360 || yaw < 0) {
-//            robotContainer.telemetry.addData("Limelight Failed because", " yaw");
-//            return null;
-//        }
-        return info;
 }

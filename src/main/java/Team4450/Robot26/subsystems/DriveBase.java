@@ -11,9 +11,9 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import Team4450.Lib.Util;
 import Team4450.Robot26.Constants.DriveConstants;
 import Team4450.Robot26.subsystems.SDS.CommandSwerveDrivetrain;
+import Team4450.Robot26.subsystems.SDS.Telemetry;
 import Team4450.Robot26.subsystems.SDS.TunerConstants;
 import Team4450.Robot26.utility.AdvantageScope;
-import Team4450.Robot26.subsystems.SDS.Telemetry;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import Team4450.Robot26.utility.RobotOrientation;
 
 /**
  * This class wraps the SDS drive base subsystem allowing us to add/modify drive base
@@ -257,6 +258,11 @@ public class DriveBase extends SubsystemBase
     public double getYaw180()
     {
         return gyro.getYaw180();
+    }
+
+    // The PigeonWrapper is named gyro
+    public RobotOrientation getRobotOrientation() { // IDK if this will really work, I'm not sure if get AngularVelocityX, Y, Z are the yaw, pitch, and roll rates
+        return new RobotOrientation(gyro.pigeon.getYaw().getValueAsDouble(), gyro.pigeon.getAngularVelocityXWorld().getValueAsDouble(), gyro.pigeon.getPitch().getValueAsDouble(), gyro.pigeon.getAngularVelocityYDevice().getValueAsDouble(), gyro.pigeon.getRoll().getValueAsDouble(), gyro.pigeon.getAngularVelocityZWorld().getValueAsDouble());
     }
 
     private void updateDS()

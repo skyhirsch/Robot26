@@ -204,30 +204,9 @@ public class RobotContainer
 
 		driveBase.setDefaultCommand(driveCommand);
 
+        // IDK if I have to init SmartDashboard data
         SmartDashboard.putNumber("Test Motor Power", 0);
-
-		//Start the compressor, PDP and camera feed monitoring Tasks.
-
-		// monitorCompressorThread = MonitorCompressorPH.getInstance(pcm);
-		// monitorCompressorThread.setDelay(1.0);
-		// monitorCompressorThread.SetLowPressureAlarm(50);
-		// monitorCompressorThread.start();
 		
-		monitorPDPThread = MonitorPDP.getInstance(pdp);
-		monitorPDPThread.start();
-		
-		//pdp.setSwitchableChannel(true);
-		
-		// Start camera server thread using our class for usb cameras.
-    
-		if (RobotBase.isReal())
-		{
-			cameraFeed = CameraFeed.getInstance(); 
-			cameraFeed.start();
-		} 
-
-
-
 		// Start a thread that will wait 30 seconds then disable the missing
 		// joystick warning. This is long enough for when the warning is valid
 		// but will stop flooding the console log when we are legitimately
