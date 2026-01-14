@@ -90,6 +90,25 @@ public class VisionSubsystem extends SubsystemBase {
             if (i % 200 == 0) {
                 // Util.consoleLog("Left" + String.valueOf(left_mt2.getX()));
                 Util.consoleLog("Left Tags: " + String.valueOf(left_mt2.rawFiducials.length));
+                if (Math.abs(left_mt2.pose.getX()) > Constants.FIELD_MAX_X) {
+                    useLeftLimelight = false;
+                    Util.consoleLog("Left Outside max x");
+                }
+
+                if (Math.abs(left_mt2.pose.getY()) > Constants.FIELD_MAX_Y) {
+                    useLeftLimelight = false;
+                    Util.consoleLog("Left Outside max y");
+                }
+
+                if (left_mt2.rawFiducials.length < 1) {
+                    useLeftLimelight = false;
+                    Util.consoleLog("Left not no good raw fids");
+                }
+
+                if (useLeftLimelight) {
+                    Util.consoleLog("Add left vision");
+                    drivebase.addVisionMeasurement(left_mt2.pose, left_mt2.timestampSeconds);
+                }
             }
             if (Math.abs(left_mt2.pose.getX()) > Constants.FIELD_MAX_X) {
                 useLeftLimelight = false;

@@ -64,9 +64,9 @@ public final class Constants
     public static int VISION_BUFFER_SIZE = 1;
 
     // Assume all field measurements are in meters
-    // Field Limits
-    public static double FIELD_MAX_X = 16.54 / 2;
-    public static double FIELD_MAX_Y = 8.07 / 2;
+    // Field Limits (The Origin of the field should be the bottom left corner therefore all pose should be in +, +)
+    public static double FIELD_MAX_X = 16.54;
+    public static double FIELD_MAX_Y = 8.07;
 
     // HUB Positions
     
