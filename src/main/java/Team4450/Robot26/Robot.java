@@ -162,25 +162,6 @@ public class Robot extends TimedRobot
     // The try/catch will catch any exceptions thrown in the commands run by the
     // scheduler and record them in our log file then stops execution of this program.
     //
-    // Limelight test
-    //
-    
-    // Util.consoleLog("Limelight One");
-    // LimelightHelpers.LimelightResults resultOne = LimelightHelpers.getLatestResults(Constants.LIMELIGHT_ONE);
-    // if (resultOne != null) {
-    //     Util.consoleLog("Limelight One see");
-    // } else {
-    //     Util.consoleLog("Limelight One no see");
-    // }
-    // Util.consoleLog("Limelight Two");
-    // LimelightHelpers.LimelightResults resultTwo = LimelightHelpers.getLatestResults(Constants.LIMELIGHT_TWO);
-    // if (resultTwo != null) {
-    //     Util.consoleLog("Limelight Two see");
-    // } else {
-    //     Util.consoleLog("Limelight Two no see");
-    // }
-
-
     if (tracing & isEnabled()) FunctionTracer.INSTANCE.enterFunction("Robot.robotPeriodic");
 
     try {
@@ -240,8 +221,6 @@ public class Robot extends TimedRobot
 
     robotContainer.getMatchInformation();
 
-    robotContainer.resetFaults();
-    
     // RobotContainer function determines which auto command is selected to run.
 
     Command autonomousCommand = robotContainer.getAutonomousCommand();
@@ -263,8 +242,7 @@ public class Robot extends TimedRobot
    * should be nothing here.
    */
   @Override
-  public void autonomousPeriodic() 
-  {
+  public void autonomousPeriodic() {
   }
 
   /**
@@ -285,7 +263,6 @@ public class Robot extends TimedRobot
     SmartDashboard.putBoolean("Disabled", false);
     SmartDashboard.putBoolean("Teleop Mode", true);
 
-    robotContainer.resetFaults();
     //robotContainer.fixPathPlannerGyro(); rich // Because of this only use blue alliance during practice
 
     // Driving handled by DriveCommand which is default command for the DriveBase.

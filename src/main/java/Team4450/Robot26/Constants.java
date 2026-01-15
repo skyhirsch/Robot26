@@ -1,4 +1,3 @@
-
 package Team4450.Robot26;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -9,7 +8,9 @@ import java.util.Properties;
 
 import Team4450.Robot26.subsystems.SDS.TunerConstants;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.DriverStation;
 
 /**
@@ -20,8 +21,7 @@ import edu.wpi.first.wpilibj.DriverStation;
  * <p>It is advised to statically import this class (or one of its inner classes) wherever the
  * constants are needed, to reduce verbosity.
  */
-public final class Constants
-{
+public final class Constants {
 	public static String		PROGRAM_NAME = "ORF26-01.09.26";
 
 	public static Robot			robot;
@@ -58,23 +58,68 @@ public final class Constants
 	// GamePad port assignments.
 	public static final int		DRIVER_PAD = 0, UTILITY_PAD = 1;
 
-    public static String LIMELIGHT_ONE = "limelight-right";
-    public static String LIMELIGHT_TWO = "limelight-left";
+    public static String LIMELIGHT_LEFT = "limelight-left";
+    // Add limelight left offset
+    public static String LIMELIGHT_RIGHT = "limelight-right";
+    // Add limelight right offset
 
-    // Goal Positions
+    public static double ROBOT_TO_QUEST_X = 0.3;
+    public static double ROBOT_TO_QUEST_Y = 0.3;
+    public static double ROBOT_TO_QUEST_Z = 0.3;
+
+    public static int VISION_BUFFER_SIZE = 1;
+
+    // Assume all field measurements are in meters
+    // Field Limits (The Origin of the field should be the bottom left corner therefore all pose should be in +, +)
+    public static double FIELD_MAX_X = 16.54;
+    public static double FIELD_MAX_Y = 8.07;
+
+    public static boolean WELDED_FIELD = false;
+
+    // HUB Positions (Center of the HUB)
     
-    // Blue
-    public static double GOAL_BLUE_X = 10;
-    public static double GOAL_BLUE_Y = 10;
+    // THESE ARE ALL IN INCHES AS THAT IS WHAT THE FIELD IS DEFINED IN
+
+    public static double HUB_BLUE_X = 4.625;
+    public static double HUB_BLUE_Y = 4.034;
     // Red
-    public static double GOAL_RED_X = 10;
-    public static double GOAL_RED_Y = 10;
+    public static double HUB_RED_X = 9.375;
+    public static double HUB_RED_Y = 4.034;
+
+    // Blue
+    public static Pose2d HUB_BLUE_ANDYMARK_POSE = new Pose2d(4.611, 4.021, Rotation2d.kZero);
+    public static Pose2d HUB_BLUE_WELDED_POSE = new Pose2d(4.625, 4.034, Rotation2d.kZero);
+    // Red
+    public static Pose2d HUB_RED_ANDYMARK_POSE = new Pose2d(11.901, 4.021, Rotation2d.kZero);
+    public static Pose2d HUB_RED_WELDED_POSE = new Pose2d(11.915, 4.034, Rotation2d.kZero);
+
+    public static double NEUTRAL_BLUE_ZONE_BARRIER_X = 4.572;
+    public static double NEUTRAL_RED_ZONE_BARRIER_X = 11.938;
+
+    public static Pose2d FERRY_BLUE_OUTPOST_CORNER = new Pose2d(1.27, 0.635, Rotation2d.kZero);
+    public static Pose2d FERRY_BLUE_BLANK_CORNER = new Pose2d(1.27, 7.407, Rotation2d.kZero);
+    
+    public static Pose2d FERRY_RED_OUTPOST_CORNER = new Pose2d(15.243, 7.407, Rotation2d.kZero);
+    public static Pose2d FERRY_RED_BLANK_CORNER = new Pose2d(15.243, 0.635, Rotation2d.kZero);
+
+    public static double FIELD_MIDDLE_Y = 4.021;
+
+    public static double ROBOT_HEADING_KP = 0;
+    public static double ROBOT_HEADING_KI = 0;
+    public static double ROBOT_HEADING_KI_MAX = 0;
+    public static double ROBOT_HEADING_KD = 0;
+    // public static double ROBOT_HEADING_KF = 0;
+    public static double ROBOT_HEADING_TOLERANCE_DEG = 2;
+    // public static double ROBOT_HEADING_MAX_OUTPUT = 1;
 
     public static double FLYWHEEL_MAX_THEORETICAL_RPM = 4000;
+
+    public static boolean UPDATE_QUESTNAV = true;
 
     // Interpolation table
     public static double[] FLYWHEEL_SPEED_TABLE = {0.57, 0.595, 0.69, 0.715, 0.73, 0.82, 0.86};
     public static double[] FLYWHEEL_SPEED_DISTANCE_TABLE = {40, 56, 90, 95, 103, 127, 152};
+    public static double[] FUEL_AIR_TIME_TABLE_SEC = {0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6};
 
     // ---------------- Turret motion profiling constants ---------------------------------
     // Turret defaults (internal units are degrees/sec and degrees/sec^2).
@@ -141,6 +186,7 @@ public final class Constants
         // Starting pose for sim. Is lower left corner (blue) or where we want sim robot to start.
         //public static final Pose2d	DEFAULT_STARTING_POSE = new Pose2d(7.473, .559, Rotation2d.kZero);
         public static final Pose2d	DEFAULT_STARTING_POSE = new Pose2d(0, 0, Rotation2d.kZero);
+        public static final Pose3d	DEFAULT_STARTING_POSE_3D = new Pose3d(0, 0, 0, Rotation3d.kZero);
     }
 
   //-------------------- No student code above this line ------------------------------------------------------

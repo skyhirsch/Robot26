@@ -1,4 +1,3 @@
-
 package Team4450.Robot26;
 
 import static Team4450.Robot26.Constants.*;
@@ -7,26 +6,22 @@ import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import Team4450.Robot26.commands.DriveCommand;
-import Team4450.Robot26.subsystems.Candle;
 import Team4450.Robot26.subsystems.TestSubsystem;
 import Team4450.Robot26.subsystems.DriveBase;
 import Team4450.Robot26.subsystems.ShuffleBoard;
-import Team4450.Robot26.subsystems.LimelightHelpers;
+import Team4450.Robot26.subsystems.VisionSubsystem;
+import Team4450.Robot26.subsystems.QuestNavSubsystem;
 import Team4450.Lib.MonitorPDP;
 import Team4450.Lib.Util;
-import Team4450.Lib.CameraFeed;
 import Team4450.Lib.XboxController;
-import Team4450.Lib.MonitorCompressorPH;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -40,16 +35,46 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * periodic methods (other than the scheduler calls).  Instead, the structure of the robot
  * (including subsystems, commands, and button mappings) should be declared here.
  */
-public class RobotContainer 
-{
+public class RobotContainer {
 	// Subsystems.
-
 	public static ShuffleBoard			 shuffleBoard;
 	public static DriveBase				 driveBase;
+    public static VisionSubsystem        visionSubsystem;
+    public static QuestNavSubsystem      questNavSubsystem;
+
 	public final DriveCommand			 driveCommand;
+
     public TestSubsystem testSubsystem;
-	//private Candle        				 candle = new Candle(CTRE_CANDLE);
+
+    // General todo list for Cole Pearson
+    //
+    // Remove any unused smartdashboard varuables
+    // Remove the candle
+    // Remove console logs that are causing radio issues
+    //
+    // Feat.
+    //
+    // Find accuracy of Limelight
+    // Test Questnav
+    // Find accuracy of Qeustnav
+    // Average between the Limelight and Questnav
+    //
+    // Add a boolean to disable the controller rotation intput to the drivebase
+    // Add a simple p-loop for heading targeting
+    // Add a little more detail into the drivebase heading target
+    //
+    // Hud swival rotation tracking and right stick intake targeting
+    //
+    // While not driveing for a little while move to x stationary
+    //
+    // When in the middle swap from hub heading targeting to left or right of the hub targeting driving
+    //
+    // Shoot on the move ability
 	
+
+
+
+
 	// Subsystem Default Commands.
 
     // Persistent Commands.
@@ -72,20 +97,11 @@ public class RobotContainer
 	// Note that button responsiveness may be slowed as the schedulers command list gets longer 
 	// or commands get longer as buttons are processed once per scheduler run.
 	
-	private XboxController			driverController =  new XboxController(DRIVER_PAD);
-	public static XboxController	utilityController = new XboxController(UTILITY_PAD);
+	public static XboxController driverController =  new XboxController(DRIVER_PAD);
+	public static XboxController utilityController = new XboxController(UTILITY_PAD);
 
-	// private PowerDistribution	pdp = new PowerDistribution(REV_PDB, PowerDistribution.ModuleType.kCTRE);
 	private PowerDistribution		pdp = new PowerDistribution(REV_PDB, PowerDistribution.ModuleType.kRev);
 
-	// Compressor class controls the CTRE/REV Pneumatics control Module.
-	// Note: When you add the compressor back in, look at resetFaults method.
-	//private Compressor				pcm = new Compressor(PneumaticsModuleType.REVPH);
-
-	private MonitorPDP     			monitorPDPThread;
-	private MonitorCompressorPH		monitorCompressorThread;
-    private CameraFeed				cameraFeed;
-    
 	// Trajectories we load manually.
 	//public static PathPlannerTrajectory	ppTestTrajectory;
 
@@ -93,11 +109,12 @@ public class RobotContainer
 	
 	private static String 			autonomousCommandName = "none";
 
+	private static PIDController headingPID;
+
 	/**
 	 * The container for the robot. Contains subsystems, Opertor Interface devices, and commands.
 	 */
-	public RobotContainer() throws Exception
-	{
+	public RobotContainer() throws Exception {
 		Util.consoleLog();
 
         this.testSubsystem = new TestSubsystem();
@@ -122,21 +139,6 @@ public class RobotContainer
 		else
 			isClone = true;
  		
-		// Set compressor enabled switch on dashboard from properties file.
-		// Later code will read that setting from the dashboard and turn 
-		// compressor on or off in response to dashboard setting.
- 		
-		boolean compressorEnabled = true;	// Default if no property.
-
-		if (robotProperties != null) 
-			compressorEnabled = Boolean.parseBoolean(robotProperties.getProperty("CompressorEnabledByDefault"));
-		
-		SmartDashboard.putBoolean("CompressorEnabled", compressorEnabled);
-
-		// Reset PDB & PCM sticky faults.
-    
-		resetFaults();
-
 		// Invert driving joy sticks Y axis so + values mean forward.
 		// Invert driving joy sticks X axis so + values mean right.
 	  
@@ -147,22 +149,18 @@ public class RobotContainer
 
 		shuffleBoard = new ShuffleBoard();
 
+        // The pigeon is setup somewhere in the drivebase function.
+        // It is important to note that the pigeon documentation says that the device does not need to be still on boot,
+        // however the documentation also says that the drift is worse when started while moving.
 		driveBase = new DriveBase();
+        visionSubsystem = new VisionSubsystem(driveBase);
+        questNavSubsystem = new QuestNavSubsystem(driveBase);
 
-		// if (RobotBase.isReal()) 
-		// {
-		// 	candle = new Candle(CTRE_CANDLE, 8+26);
-		// 	candle.setDefaultCommand(new UpdateCandle(candle));
-		// }
+		headingPID = new PIDController(Constants.ROBOT_HEADING_KP, Constants.ROBOT_HEADING_KI, Constants.ROBOT_HEADING_KD);
 
 		// Create any persistent commands.
 
 		// Set any subsystem Default commands.
-
-		// This sets up the photonVision subsystem to constantly update the robotDrive odometry
-	    // with AprilTags (if it sees them). (As well as vision simulator)
-
-		// pvAlgaeTagCamera.setDefaultCommand(new UpdateVisionPose(driveBase, pvAlgaeTagCamera));
 
 		// Set the default drive command. This command will be scheduled automatically to run
 		// every teleop period and so use the gamepad joy sticks to drive the robot. 
@@ -200,34 +198,13 @@ public class RobotContainer
 		 							() -> driverController.getLeftY(),
 									driverController.getLeftXDS(), 
 									driverController.getRightXDS(),
-									driverController);
-
+									driverController.getRightYDS(),
+									driverController, headingPID);
 		driveBase.setDefaultCommand(driveCommand);
 
-	// Test Motor Power dashboard entry removed; flywheel start is code-controlled via Constants.FLYWHEEL_DEFAULT_START_PERCENT
-
-		//Start the compressor, PDP and camera feed monitoring Tasks.
-
-		// monitorCompressorThread = MonitorCompressorPH.getInstance(pcm);
-		// monitorCompressorThread.setDelay(1.0);
-		// monitorCompressorThread.SetLowPressureAlarm(50);
-		// monitorCompressorThread.start();
+        // IDK if I have to init SmartDashboard data
+        SmartDashboard.putNumber("Test Motor Power", 0);
 		
-		monitorPDPThread = MonitorPDP.getInstance(pdp);
-		monitorPDPThread.start();
-		
-		//pdp.setSwitchableChannel(true);
-		
-		// Start camera server thread using our class for usb cameras.
-    
-		if (RobotBase.isReal())
-		{
-			cameraFeed = CameraFeed.getInstance(); 
-			cameraFeed.start();
-		} 
-
-
-
 		// Start a thread that will wait 30 seconds then disable the missing
 		// joystick warning. This is long enough for when the warning is valid
 		// but will stop flooding the console log when we are legitimately
@@ -261,8 +238,7 @@ public class RobotContainer
      * 
      * These buttons are for robot driver station with 2 Xbox or F310 controllers.
 	 */
-	private void configureButtonBindings() 
-	{
+	private void configureButtonBindings() {
 		Util.consoleLog();
 	  
 		// ------- Driver controller buttons -------------
@@ -405,25 +381,6 @@ public class RobotContainer
     		  		   gameMessage);
 	}
 		
-	/**
-	 * Reset sticky faults in PDP and turn compressor on/off as
-	 * set by switch on DS.
-	 */
-	public void resetFaults()
-	{
-		// This code turns on/off the automatic compressor management if requested by DS. Putting this
-		// here is a convenience since this function is called at each mode change.
-		// if (SmartDashboard.getBoolean("CompressorEnabled", true)) 
-		// 	pcm.enableDigital();
-		// else
-		// 	pcm.disable();
-		
-		pdp.clearStickyFaults();
-		//pcm.clearAllStickyFaults(); // Add back if we use a CTRE pcm.
-		
-		if (monitorPDPThread != null) monitorPDPThread.reset();
-    }
-
 	// public void fixPathPlannerGyro() { rich
 	// 	driveBase.fixPathPlannerGyro();
 	// }
