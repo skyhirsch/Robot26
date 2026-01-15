@@ -295,7 +295,7 @@ public class DriveBase extends SubsystemBase {
         double deltaX = targetPose.getX() - currentPose.getX();
         double deltaY = targetPose.getY() - currentPose.getY();
 
-        double distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
+        double distance = Math.hypot(deltaX, deltaY);
 
         double airTime;
 
@@ -318,19 +318,32 @@ public class DriveBase extends SubsystemBase {
                     lowerPoint = currentDistance;
                     lowerPointIndex = i;
                 }
-            } else if (currentDistance == distance) {
+            } else {
                 airTime = FUEL_AIR_TIME_TABLE_SEC[i];
-                break;
+
+                double xVelocityOffset = driveField.VelocityX * airTime;
+                double yVelocityOffset = driveField.VelocityY * airTime;
+        
+                deltaX += xVelocityOffset;
+                deltaY += yVelocityOffset;
+
+                double angleToAim = Math.toDegrees(Math.atan2(deltaY, deltaX));
+
+                return angleToAim;
             }
         }
 
         double lowerTime = FUEL_AIR_TIME_TABLE_SEC[lowerPointIndex];
         double higherTime = FUEL_AIR_TIME_TABLE_SEC[higherPointIndex];
 
-        airTime = lowerTime + ((higherTime - lowerTime) * (distance - lowerPoint) / (higherPoint - lowerPoint));
+        if (higherPoint == lowerPoint) {
+            airTime = lowerTime;
+        } else {
+            airTime = lowerTime + ((higherTime - lowerTime) * (distance - lowerPoint) / (higherPoint - lowerPoint));
+        }
 
-        double xVelocityOffset = ((driveField.VelocityX * airTime) / 100) / 2.54;
-        double yVelocityOffset = ((driveField.VelocityY * airTime) / 100) / 2.54;
+        double xVelocityOffset = driveField.VelocityX * airTime;
+        double yVelocityOffset = driveField.VelocityY * airTime;
         
         deltaX += xVelocityOffset;
         deltaY += yVelocityOffset;
