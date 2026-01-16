@@ -22,11 +22,14 @@ public class Turret extends SubsystemBase {
     // Flywheel runtime tunables (RPM and RPM/s units on dashboard)
     // (flywheel is currently controlled by TestSubsystem; no dashboard-driven flywheel tunables here)
 
-    public Turret() {
+    private final DriveBase driveBase;
+
+    public Turret(DriveBase driveBase) {
         // initialize commanded angle to whatever a reasonable default is
         this.commandedAngleDeg = 0.0;
         this.requestedAngleDeg = 0.0;
         this.commandedAngularVelocity = 0.0;
+        this.driveBase = driveBase;
 
         // Publish tuning values to SmartDashboard so they can be changed while testing.
         // Publish both RPM-based and internal values for clarity/editing.
@@ -57,7 +60,7 @@ public class Turret extends SubsystemBase {
     public void aimTurret(Pose2d robotPosition) {
         setTargetAngle(getAngleToFaceGoalDegrees(robotPosition));
 
-        double targetFlywheelSpeed = getNeededFlywheelSpeed(distToGoal(robotPosition));
+        double targetFlywheelSpeed = getNeededFlywheelSpeed(driveBase.getDistFromRobot(driveBase.getPoseToAim(getGoalPose())));
         setFlywheelSpeed(targetFlywheelSpeed);
     }
 
@@ -78,21 +81,16 @@ public class Turret extends SubsystemBase {
         return targetVelocity * FLYWHEEL_MAX_THEORETICAL_RPM; // Normalize the target velocity by the max theoretical
     }
 
-    public double distToGoal(Pose2d robotPosition) {
+    public Pose2d getGoalPose() {
         // If blue side
-        double xDiff = 0;
-        double yDiff = 0;
         if (alliance == Alliance.Blue) {
-            xDiff = HUB_BLUE_ANDYMARK_POSE.getX() - robotPosition.getX();
-            yDiff = HUB_BLUE_ANDYMARK_POSE.getY() + robotPosition.getY();
+            return HUB_BLUE_ANDYMARK_POSE;
         // If red side
         } else if (alliance == Alliance.Red) {
-            xDiff = HUB_RED_ANDYMARK_POSE.getX() - robotPosition.getX();
-            yDiff = HUB_RED_ANDYMARK_POSE.getY() - robotPosition.getY();
+            return HUB_RED_ANDYMARK_POSE;
         } else {
-            // Error
+            return null; // Error
         }
-        return Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
     }
 
     public double getAngleToFaceGoalDegrees(Pose2d robotPosition) {
