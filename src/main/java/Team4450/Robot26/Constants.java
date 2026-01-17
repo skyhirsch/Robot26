@@ -28,7 +28,7 @@ public final class Constants {
 
 	public static Properties	robotProperties;
 	  
-	public static boolean		isClone = false, isComp = false, tracing = false;
+	public static boolean		isClone = false, isComp = false;
 	    	
 	public static DriverStation.Alliance	 alliance;
 	public static int                        location, matchNumber;

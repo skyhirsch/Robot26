@@ -160,7 +160,6 @@ public class Robot extends TimedRobot
     // The try/catch will catch any exceptions thrown in the commands run by the
     // scheduler and record them in our log file then stops execution of this program.
     //
-    if (tracing & isEnabled()) FunctionTracer.INSTANCE.enterFunction("Robot.robotPeriodic");
 
     try {
       CommandScheduler.getInstance().run();
@@ -168,8 +167,6 @@ public class Robot extends TimedRobot
       Util.logException(e);
       this.endCompetition();
     }
-
-    if (tracing & isEnabled()) FunctionTracer.INSTANCE.exitFunction("Robot.robotPeriodic");
   }
 
   /**
@@ -274,8 +271,6 @@ public class Robot extends TimedRobot
     // Driving handled by DriveCommand which is default command for the DriveBase.
     // Other commands scheduled by joystick buttons.
 
-    if  (tracing) FunctionTracer.INSTANCE.reset();
-
     Util.consoleLog(functionMarker);
   }
 
@@ -284,9 +279,7 @@ public class Robot extends TimedRobot
    * be nothing here.
    */
   @Override
-  public void teleopPeriodic() 
-  {
-    if (tracing) FunctionTracer.INSTANCE.printFunctions(Util.logPrintStream);
+  public void teleopPeriodic() {
   }
 
   @Override
@@ -297,8 +290,7 @@ public class Robot extends TimedRobot
    * This function is called once at the start of test mode.
    */
   @Override
-  public void testInit() 
-  {
+  public void testInit() {
     Util.consoleLog();
 
     // Cancels all running commands at the start of test mode.

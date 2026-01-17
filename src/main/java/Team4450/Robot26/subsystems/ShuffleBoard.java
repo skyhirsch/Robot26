@@ -24,15 +24,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * This class supports running LCD updates in a separate thread to reduce overhead
  * on the main robot control thread.
  */
-public class ShuffleBoard extends SubsystemBase
-{
+public class ShuffleBoard extends SubsystemBase {
     public int                  currentTab, numberOfTabs = 3;
 
     private NotifierCommand     updateCommand;
     private Notifier            notifier;
 
-	public ShuffleBoard()
-	{
+	public ShuffleBoard() {
         // We use a NotifierCommand to run the DS update process in a separate thread
         // from the main thread. We set that command as the default command for this
         // subsystem so the scheduler starts the command. After start, the notifier
@@ -48,8 +46,7 @@ public class ShuffleBoard extends SubsystemBase
 	// This method will be called once per scheduler run on the scheduler (main) thread. Only
     // used if not running the updateDS with the notifier.
 	@Override
-	public void periodic()
-    {
+	public void periodic() {
         //updateDS();
     }
 
@@ -57,10 +54,7 @@ public class ShuffleBoard extends SubsystemBase
      * Update the LCD tab of the Shuffleboard. Do not call if this class is running in it's
      * own thread.
      */
-    public void updateDS()
-	{    
-        if (tracing) FunctionTracer.INSTANCE.enterFunction("ShuffleBoard.updateDS");
-      
+    public void updateDS() {    
         Pose2d pose = RobotContainer.driveBase.getPose(); 
         
         // Lines 1 & 2 handled elsewhere.
@@ -73,8 +67,6 @@ public class ShuffleBoard extends SubsystemBase
                       RobotContainer.utilityController.getLeftY(), 
                       RobotContainer.utilityController.getRightX(),
                       RobotContainer.utilityController.getRightY());
-                          
-        if (tracing) FunctionTracer.INSTANCE.exitFunction("ShuffleBoard.updateDS");
     }
 
     /**
