@@ -29,6 +29,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -280,10 +282,13 @@ public class RobotContainer {
 		//  	.onTrue(new InstantCommand(driveBase::toggleFieldRelativeDriving));
 
 		new Trigger(() -> driverController.getAButton())
-		 	.onTrue(new InstantCommand(testSubsystem::start));
+		 	.onTrue(new InstantCommand(questNavSubsystem::resetTestPose));
+
+		// new Trigger(() -> driverController.getBButton())
+		//  	.onTrue(new InstantCommand(questNavSubsystem::resetToZeroPose));
 
 		new Trigger(() -> driverController.getBButton())
-		 	.onTrue(new InstantCommand(testSubsystem::stop));
+		 	.onTrue(new InstantCommand(() -> drivebase.resetOdometry(new Pose2d(0, 0, Rotation2d.kZero))));
 
 		// // Toggle motor brake mode.
 		// new Trigger(() -> driverController.getBButton()) // Rich
@@ -296,11 +301,11 @@ public class RobotContainer {
 		// -------- Utility controller buttons ----------
 
 		// Driver controller A/B used for flywheel start/stop (TestSubsystem currently drives the motor)
-		new Trigger(() -> driverController.getAButton())
-			.onTrue(new InstantCommand(testSubsystem::start));
+		// new Trigger(() -> driverController.getAButton())
+		// 	.onTrue(new InstantCommand(testSubsystem::start));
 
-		new Trigger(() -> driverController.getBButton())
-			.onTrue(new InstantCommand(testSubsystem::stop));
+		// new Trigger(() -> driverController.getBButton())
+		// 	.onTrue(new InstantCommand(testSubsystem::stop));
 
 	}
 
