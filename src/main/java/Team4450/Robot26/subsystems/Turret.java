@@ -24,6 +24,14 @@ public class Turret extends SubsystemBase {
 
     private final DriveBase driveBase;
 
+    // Constants for launch calculations
+    private static final double GRAVITY = 9.81;
+    private static final double DESIRED_MAX_HEIGHT = 2.5; // meters (8.2 feet)
+    private static final double GOAL_HEIGHT = 1.8288; // meters (6 feet)
+    private static final double FLYWHEEL_HEIGHT = 0.5334; // meters (21 inches)
+    private static final double CONVERSION_FACTOR_MPS_TO_RPM = 10000 / 47.93;
+    private static final double MOTOR_TICKS_PER_REVOLUTION = 2048; // for Falcon 500
+
     public Turret(DriveBase driveBase) {
         // initialize commanded angle to whatever a reasonable default is
         this.commandedAngleDeg = 0.0;
@@ -58,14 +66,6 @@ public class Turret extends SubsystemBase {
     }
 
     public void updateLaunchValues(){
-        // Needed to calculate: IDK where to put these constants
-            public static double GRAVITY = 9.81;
-            public static double DESIRED_MAX_HEIGHT = 2.5; // meters (8.2 feet) seemed reasonable in the desmos predictions at this height the fuel never landed at an angle shallower than 31 degrees
-            public static double GOAL_HEIGHT = 1.8288; // meters (6 feet)
-            public static double FLYWHEEL_HEIGHT = 0.5334; // CAD needs to be finalized (this is 21 inches which is what jonathan told me)
-            public static double CONVERSION_FACTOR_MPS_TO_RPM = 10000 / 47.93; // imput rpm / output mps (Use https://www.reca.lc/flywheel rpm calculator to get this value)
-            public static double MOTOR_TICKS_PER_REVOLUTION = 2048; // for the falcon 500 I think I only need this for FTC though
-
         // Calculate distance to goal
         double xDiff = getGoalPose().getX() - driveBase.getPose().getX();
         double yDiff = getGoalPose().getY() - driveBase.getPose().getY();
