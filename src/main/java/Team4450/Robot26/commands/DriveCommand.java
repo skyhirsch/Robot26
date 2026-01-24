@@ -84,6 +84,7 @@ public class DriveCommand extends Command
         
         if (robot.isAutonomous()) return;
 
+        // This finds where the correct hub position is
         Pose2d hubPosition;
         if (alliance == DriverStation.Alliance.Blue) {
             hubPosition = new Pose2d(HUB_BLUE_WELDED_POSE.getX(), HUB_BLUE_WELDED_POSE.getY(), Rotation2d.kZero);
@@ -91,17 +92,25 @@ public class DriveCommand extends Command
             hubPosition = new Pose2d(HUB_RED_WELDED_POSE.getX(), HUB_RED_WELDED_POSE.getY(), Rotation2d.kZero);
         }
         
+        
         double targetHeading;
+        
+        // Decides where to track
+        
+        // If both inputs are zero and the alliance is blue then
         if (rotationXSupplier.getAsDouble() == 0 && rotationYSupplier.getAsDouble() == 0 && alliance == DriverStation.Alliance.Blue) {
+            // Checks if robot is currently in the Alliance Zone then aims at the hub
             if (drivebase.getODPose().getX() < NEUTRAL_BLUE_ZONE_BARRIER_X) {
                 targetHeading = drivebase.getAngleToAim(hubPosition);
             } else {
+                // Checks what side the robot is on, and aims at the nearest ferrying target point predefined in Constants
                 if (drivebase.getODPose().getY() < FIELD_MIDDLE_Y) {
                     targetHeading = drivebase.getAngleToAim(FERRY_BLUE_OUTPOST_CORNER);
                 } else {
                     targetHeading = drivebase.getAngleToAim(FERRY_BLUE_BLANK_CORNER);
                 }
             }
+            // This does the same thing but for the red alliance
         } else if (rotationXSupplier.getAsDouble() == 0 && rotationYSupplier.getAsDouble() == 0 && alliance == DriverStation.Alliance.Red) {
             if (drivebase.getODPose().getX() > NEUTRAL_RED_ZONE_BARRIER_X) {
                 targetHeading = drivebase.getAngleToAim(hubPosition);
@@ -112,11 +121,12 @@ public class DriveCommand extends Command
                     targetHeading = drivebase.getAngleToAim(FERRY_RED_OUTPOST_CORNER);
                 }
             }
-            
+            // If there IS input, set the target heading to where the joystick si facing in relation to the driver
         } else {
             targetHeading = -Math.toDegrees(Math.atan2(rotationYSupplier.getAsDouble(), rotationXSupplier.getAsDouble()));
         }
 
+        // Uses a PID and the previous assigned target heading to rotate there
         double rotation = -headingPID.calculate(drivebase.getYaw180(), -targetHeading);
         // double rotation = rotationXSupplier.getAsDouble();
         double throttle = throttleSupplier.getAsDouble();
