@@ -123,8 +123,6 @@ public final class Constants {
     // public static double ROBOT_HEADING_MAX_OUTPUT = 1;
     public static boolean ROBOT_HEADING_PID_TOGGLE = true;
 
-    public static double FLYWHEEL_MAX_THEORETICAL_RPM = 4000;
-
     // Interpolation table
     public static double[] FLYWHEEL_SPEED_TABLE = {0.57, 0.595, 0.69, 0.715, 0.73, 0.82, 0.86};
     public static double[] FLYWHEEL_SPEED_DISTANCE_TABLE = {40, 56, 90, 95, 103, 127, 152};
@@ -146,14 +144,128 @@ public final class Constants {
     // When within this many degrees, snap to setpoint and zero velocity.
     public static final double TURRET_ANGLE_TOLERANCE_DEG = 0.5;
     // -------------------------------------------------------------------------------------
+    
+    /*
 
     // Flywheel tuning defaults
     // Default target RPM for flywheel (used as a manual override/starting value)
-    public static final double FLYWHEEL_DEFAULT_TARGET_RPM = 1845.0;
+    // Keep this positive; use `FLYWHEEL_DIRECTION` to invert sign for hardware wiring differences.
+    public static final double FLYWHEEL_DEFAULT_TARGET_RPM = 2500.0;
     // Default flywheel acceleration in RPM per second (used for ramping if implemented)
-    public static final double FLYWHEEL_DEFAULT_ACCEL_RPMS = 20000.0;
+    public static final double FLYWHEEL_DEFAULT_ACCEL_RPMS = 5000.0;
     // Default open-loop start percent for flywheel when controlled by code only (0.0 - 1.0)
     public static final double FLYWHEEL_DEFAULT_START_PERCENT = 0.5; // 50% output
+
+    // Flywheel motor / PID and feedforward tuning constants (used by onboard TalonFX closed-loop)
+    // CAN ID for flywheel TalonFX
+    public static final int FLYWHEEL_MOTOR_CAN_ID = 10; // matches existing TestSubsystem default
+
+    // Closed-loop slot selection
+    public static final int FLYWHEEL_PID_SLOT = 0;
+
+    // Feedforward-ish gains (units used by Phoenix6 API: kV/kA in Volts/(rot/s) and Volts/(rot/s/s),
+    // kS in Volts). Start conservative and tune on the robot/Phoenix Tuner.
+    public static final double FLYWHEEL_kS = 0.25;   // static friction voltage (V)
+    public static final double FLYWHEEL_kV = 0.12;   // volts per rps (V / rps)
+    public static final double FLYWHEEL_kA = 0.00;   // volts per (rps/s) (V / (rps/s))
+
+    // Direction multiplier for flywheel hardware. Set to 1.0 for normal, -1.0 to invert
+    // the commanded velocity/voltage signs if the motor spins the wrong way.
+    // NOTE: keep target RPMs positive in the constants and flip direction here instead
+    // of making the target negative — the subsystem will multiply the commanded
+    // velocity/feedforward by this value.
+    public static final double FLYWHEEL_DIRECTION = -1.0;
+
+    // PID gains for velocity closed-loop (these are in Volt-output PID units used by Phoenix)
+    public static final double FLYWHEEL_kP = 0.17;
+    public static final double FLYWHEEL_kI = 0.0;
+    public static final double FLYWHEEL_kD = 0.0;
+
+    // Motion Magic / Motion profiling defaults (if you later want MotionMagic Velocity)
+    public static final boolean FLYWHEEL_USE_MOTION_MAGIC_VELOCITY = false; // leave false to use basic velocity control
+    public static final double FLYWHEEL_MOTION_ACCEL_RPMS = 2000.0; // RPM/s used by motion magic (convert to rps/s internally)
+    public static final double FLYWHEEL_MOTION_JERK = 0.0; // optional jerk
+
+    // Grouped flywheel tuning constants (single place to find PID + feedforward)
+    // Edit these values when tuning the flywheel. These are the authoritative
+    // values used for on-device TalonFX closed-loop control (kS/kV/kA in Volts,
+    // kP/kI/kD for the velocity PID slot).
+    public static final class Flywheel {
+        // CAN ID for flywheel TalonFX
+        public static final int MOTOR_CAN_ID = 10; // matches existing TestSubsystem default
+
+        // Closed-loop slot selection
+        public static final int PID_SLOT = 0;
+
+        // Feedforward-ish gains (units used by Phoenix6 API: kV/kA in Volts/(rot/s) and Volts/(rot/s/s),
+        // kS in Volts). Start conservative and tune on the robot/Phoenix Tuner.
+        public static final double kS = 0.25;   // static friction voltage (V)
+        public static final double kV = 0.12;   // volts per rps (V / rps)
+        public static final double kA = 0.00;   // volts per (rps/s) (V / (rps/s))
+
+        // PID gains for velocity closed-loop (these are in Volt-output PID units used by Phoenix)
+        public static final double kP = 0.17;
+        public static final double kI = 0.0;
+        public static final double kD = 0.0;
+
+    // Default target RPM for flywheel (used as a manual override/starting value)
+    // Keep this in the same units as the top-level constant (RPM).
+    public static final double DEFAULT_TARGET_RPM = 1845.0;
+
+    // Default flywheel acceleration in RPM per second (used for ramping if implemented)
+    public static final double DEFAULT_ACCEL_RPMS = 20000.0;
+
+        // Default open-loop start percent for flywheel when controlled by code only (0.0 - 1.0)
+        public static final double DEFAULT_START_PERCENT = 0.5; // 50% output
+
+        // Motion Magic / Motion profiling defaults (if you later want MotionMagic Velocity)
+        public static final boolean USE_MOTION_MAGIC_VELOCITY = false; // leave false to use basic velocity control
+        public static final double MOTION_ACCEL_RPMS = 2000.0; // RPM/s used by motion magic (convert to rps/s internally)
+        public static final double MOTION_JERK = 0.0; // optional jerk
+
+        // theoretical limits (for telemetry/approximation)
+        public static final double MAX_THEORETICAL_RPM = 4000.0;
+    }
+    */
+
+    // -------------------------------------------------------------------------------------
+    // Flywheel tuning defaults (used as Shuffleboard starting values)
+    
+    // Default target RPM
+    public static final double FLYWHEEL_TARGET_RPM = 2650.0;
+
+    // CAN ID for flywheel TalonFX
+    public static final int FLYWHEEL_MOTOR_CAN_ID = 10;
+
+    // Closed-loop slot selection
+    public static final int FLYWHEEL_PID_SLOT = 0;
+    // Motor inversion handled in Talon configuration (not math)
+    public static final boolean FLYWHEEL_INVERTED = true;
+
+    // ---------------- Feedforward (Talon internal) ----------------
+    // Units: Volts, Volts/(rps), Volts/(rps/s)
+    public static final double FLYWHEEL_kS = 0.1;
+    public static final double FLYWHEEL_kV = 0.11;
+    public static final double FLYWHEEL_kA = 0.05;
+    // ---------------- PID (Velocity) ----------------
+    public static final double FLYWHEEL_kP = 0.45;
+    public static final double FLYWHEEL_kI = 0.25;
+    public static final double FLYWHEEL_kD = 0.0;
+
+    // ---------------- Motion Magic Velocity ----------------
+    // These only affect ramp rate
+    public static final boolean FLYWHEEL_USE_MOTION_MAGIC = true;
+
+    public static final double FLYWHEEL_MOTION_ACCEL_RPMS = 5000.0; // RPM/s
+    public static final double FLYWHEEL_MOTION_JERK = 0.0;
+
+    // ---------------- Telemetry / limits ----------------
+    public static final double FLYWHEEL_MAX_THEORETICAL_RPM = 4000.0;
+
+    // Flip this to 1 or -1 if direction is wrong
+    public static final int FLYWHEEL_DIRECTION = -1;
+
+    
 
     // What is the LCD
 	// LCD display line number constants showing class where the line is set.
